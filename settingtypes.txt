@@ -1,0 +1,3 @@
+# If enabled the orecutting dig stone between the cutted ores
+# after tree nodes removed
+orecutting_dig_stone (Dig stone) bool true
