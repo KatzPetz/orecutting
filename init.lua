@@ -100,7 +100,7 @@ function orecutting_class:add_ore_neighbors(pos)
 		local poshash = minetest.hash_node_position(pos_ore)
 		if not self.orenodes_hashed[poshash] then
 			local ore_nodename = orecutting.ore_content_ids[data[i]]
-			if ore_nodename then
+			if ore_nodename and ore_nodename == self.ore_name then
 				table.insert(self.orenodes_sorted, pos_ore)
 				self.orenodes_hashed[poshash] = ore_nodename
 				table.insert(orenodes_new, pos_ore)
@@ -260,7 +260,7 @@ end
 --- Create hud message
 ----------------------------------
 function orecutting_class:get_hud_message(pos)
-	local message = "orecutting active. Hold sneak key to disable it"
+	local message = "orecutting active for "..self.ore_name..". Hold sneak key to disable it"
 	if pos then
 		message = '['..#self.orenodes_sorted..'] '..minetest.pos_to_string(pos).." | "..message
 	end
@@ -310,6 +310,7 @@ minetest.register_on_dignode(function(pos, oldnode, digger)
 	if not process and sneak then
 		process = orecutting.new_process(playername, {
 			sneak_pressed = true, -- to control sneak toggle
+			ore_name = oldnode.name,
 		})
 	end
 	if not process then
