@@ -335,8 +335,15 @@ minetest.after(0, function ()
 		if ore.wherein and ore.ore_type == "scatter" then
 			local id = minetest.get_content_id(ore.ore)
 			orecutting.ore_content_ids[id] = ore.ore
-			id = minetest.get_content_id(ore.wherein)
-			orecutting.stone_content_ids[id] = ore.wherein
+			if type(ore.wherein) == "table" then
+				for _, v in ipairs(ore.wherein) do
+					id = minetest.get_content_id(v)
+					orecutting.stone_content_ids[id] = v
+				end
+			else
+				id = minetest.get_content_id(ore.wherein)
+				orecutting.stone_content_ids[id] = ore.wherein
+			end
 		end
 	end
 end)
