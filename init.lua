@@ -139,7 +139,15 @@ function orecutting_class:get_delay_time(pos)
 	local nodedef = minetest.registered_nodes[self.orenodes_hashed[poshash]]
 	local capabilities = self._player:get_wielded_item():get_tool_capabilities()
 	local dig_params = minetest.get_dig_params(nodedef.groups, capabilities)
-	return dig_params.time
+	if dig_params.diggable then
+		return dig_params.time
+	else
+		-- try hand if the tool is not able to dig
+		local dig_params = minetest.get_dig_params(nodedef.groups, minetest.registered_items[""].tool_capabilities)
+		if dig_params.diggable then
+			return dig_params.time
+		end
+	end
 end
 
 ----------------------------------
@@ -195,13 +203,13 @@ function orecutting_class:process_cut_step()
 		if pos then
 			if process:check_processing_allowed(pos) then
 				local delaytime = process:get_delay_time(pos)
-				if delaytime == 0 then
+				if delaytime then
+					table.remove(process.orenodes_sorted, 1)
+					process:cut_node(pos, delaytime)
+				else
 					-- wait for right tool is used, try again
 					process:process_cut_step()
-					return
 				end
-				table.remove(process.orenodes_sorted, 1)
-				process:cut_node(pos, delaytime)
 			else
 				-- just remove from hashed table and trigger the next step
 				local poshash = minetest.hash_node_position(pos)
@@ -214,7 +222,6 @@ function orecutting_class:process_cut_step()
 			process:process_cut_step()
 		else
 			process:stop_process()
-			return
 		end
 	end
 	minetest.after(0.1, run_process_cut_step, self.playername)
